@@ -1,6 +1,4 @@
 <?php
-// Διαχείριση δημιουργίας νέου συλλόγου
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $clubName = trim($_POST['club_name'] ?? '');
     $adminEmail = trim($_POST['admin_email'] ?? '');
@@ -8,26 +6,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $phone = trim($_POST['phone'] ?? '');
 
     if ($clubName && $adminEmail && $adminPassword) {
-        $subdomain = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', str_replace(' ', '', $clubName)));
-        $sitePath = __DIR__ . '/../sites/' . $subdomain;
+        $slug = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', str_replace(' ', '', $clubName)));
+        $clubPath = __DIR__ . '/../clubs/' . $slug;
 
-        if (file_exists($sitePath)) {
-            die("⚠️ Ο σύλλογος ήδη υπάρχει: $subdomain");
+        if (file_exists($clubPath)) {
+            die("⚠️ Ο σύλλογος ήδη υπάρχει: $slug");
         }
 
-        // Δημιουργία φακέλου
-        mkdir($sitePath, 0777, true);
+        mkdir($clubPath, 0777, true);
 
-        // Αντιγραφή base-site στο νέο φάκελο
-        $base = realpath(__DIR__ . '/../base-site');
-        shell_exec("cp -r $base/* $sitePath");
+        $base = realpath(__DIR__ . '/../base-club');
+        shell_exec("cp -r $base/* $clubPath");
 
-        // Δημιουργία αρχείου log
-        file_put_contents($sitePath . "/info.txt", "Σύλλογος: $clubName\nEmail: $adminEmail\nΤηλέφωνο: $phone\n");
+        file_put_contents($clubPath . "/info.txt", "Σύλλογος: $clubName\nEmail: $adminEmail\nΤηλέφωνο: $phone\n");
 
-        // (TODO) Δημιουργία βάσης, wp-config, admin user, αποστολή email
-
-        echo "✅ Ο σύλλογος '$clubName' δημιουργήθηκε στο subdomain: <strong>$subdomain.organose.gr</strong>";
+        echo "✅ Ο σύλλογος '$clubName' δημιουργήθηκε στο <a href='/clubs/$slug/' target='_blank'>/clubs/$slug/</a>";
     } else {
         echo "❌ Λείπουν υποχρεωτικά πεδία.";
     }
